@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Inverse Path - Research</title>
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="stylesheet" href="styles/inversepath.css?113022017" type="text/css" />
+</head>
+
+<body>
+  <div id="page">
+    <div id="header">
+      <a id="inversepath_logo" href="index.html">Inverse Path</a>
+
+      <br/>
+
+      <ul id="top_menu">
+        <li><a href="industries.html">INDUSTRIES</a></li>
+        <li><a href="services.html">SERVICES</a></li>
+        <li><a href="usbarmory.html">PRODUCTS</a></li>
+        <li><a href="research.html">RESEARCH</a></li>
+        <li><a href="news.html">NEWS</a></li>
+        <li><a href="company.html">COMPANY</a></li>
+      </ul>
+
+      <ul id="top_menu_second_level">
+        <li><a class="selected">FTESTER</a></li>
+        <li><a href="ftester_man.html">DOCUMENTATION</a></li>
+        <li><a href="https://github.com/inversepath/ftester">REPOSITORY</a></li>
+      </ul>
+
+    </div>
+
+    <div class="section_title">FTESTER - FIREWALL AND IDS TESTING TOOL</div>
+
+    <div class="section">
+      <p>The Firewall Tester (<b>FTester</b>) is a tool designed for testing firewall
+      filtering policies and Intrusion Detection System (IDS) capabilities.</p>
+
+      <p>The tool consists of two perl scripts, a packet injector (ftest) and a
+      listening sniffer (ftestd). The first script injects custom packets, defined
+      in ftest.conf, with a signature in the data part while the sniffer listens for
+      such marked packets. The scripts both write a log file which is in the same
+      form for both scripts. A comparison of the two produced log files (ftest.log and ftestd.log)
+      outlines the packets that were unable to reach the sniffer due to filtering rules
+      if these two scripts are ran on hosts placed on two different sides of a
+      firewall. Stateful inspection firewalls are handled with the 'connection
+      spoofing' option. A script called freport is also available to automatically
+      parse the log files.</p>
+
+      <p>Using the tool is not a completely automated process, ftest.conf must
+      be crafted for every different situation. Examples and rules are included in
+      the attached configuration file.</p>
+
+      <p>The IDS (Intrusion Detection System) testing feature can be used
+      either with ftest only or with the additional support of ftestd for handling
+      stateful inspection IDS, ftest can also use common IDS evasion techniques. The
+      script can also process snort rule definition files.</p>
+
+      <h2>Features:</h2>
+      <ul>
+        <li>firewall testing</li>
+        <li>IDS testing</li>
+        <li>simulation of real tcp connections for stateful inspection firewalls and IDS</li>
+        <li>TCP connection spoofing</li>
+        <li>IP fragmentation / TCP segmentation</li>
+        <li>IDS evasion techniques</li>
+      </ul>
+
+      <p><b>NOTE</b>: this tool is now outdated and is presented here for historical
+      reasons.</p>
+    </div>
+
+    <div class="section_title">REQUIREMENTS</div>
+
+    <div class="section">
+      <p>The following perl modules are required: Net::RawIP, Net::PcapUtils, NetPacket</p>
+    </div>
+
+    <div class="section_title">DOCUMENTATION</div>
+
+    <div class="section">
+      <p>The full <a href="ftester_man.html">man page</a>.</p>
+      <p><a href="http://www.tisc-insight.com/newsletters/56.html">TISC Insight, Volume 5, Issue 6: Testing firewalls and IDS with Ftester</a></p>
+    </div>
+
+    <div class="section_title">RESOURCES</div>
+
+    <div class="section">
+      <p>The public repository is hosted on GitHub at <a href="https://github.com/inversepath/ftester">https://github.com/inversepath/ftester</a></p>
+
+      <p>Please send requests/suggestions/bug reports to <a href="mailto:ftester@inversepath.com">ftester@inversepath.com</a></p>
+    </div>
+
+    <div id="footer">
+      <div class="float_left">
+        &copy; F-Secure Corporation - All rights reserved. | <a href="company.html" title="Contact Us">Contact Us</a> | <a href="javascript:showLegal()">Legal</a>
+      </div>
+
+      <ul id="logos_menu">
+        <li><a class="infrastructure" href="services.html#infrastructure">INFRASTRUCTURE</a></li>
+        <li><a class="hardware" href="services.html#hardware">HARDWARE</a></li>
+        <li><a class="security" href="services.html#security">SECURITY</a></li>
+        <li><a class="software" href="services.html#software">SOFTWARE</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="legal_popup" style="visibility:hidden;">
+    <div id="fade"></div>
+    <div class="popup_block">
+      <div class="popup">
+        <a href="javascript:hideLegal()"><img src="images/popup_close.png" class="close_button" title="Close" alt="Close" /></a>
+        <b>Inverse Path is a registered trademark of F-Secure Corporation</b>
+        <br/><br/>
+        <b>Trieste office</b><br/>Via Mazzini 33, I-34121, Trieste - Italy
+        <br/><br/>
+        <b>F-Secure Corporation</b><br/>Tammasaarenkatu 7, FI-00181 Helsinki, Finland<br/>
+        <b>Business ID</b><br/>Registered office Helsinki - 0705579-2<br/>
+        <b>VAT Reg.</b><br/>FI07055792
+        <br/><br/>
+      </div>
+    </div>
+  </div>
+
+<script type="text/javascript">
+  function hideLegal() { document.getElementById('legal_popup').style.visibility = 'hidden'; }
+  function showLegal() { document.getElementById('legal_popup').style.visibility = 'visible'; }
+</script>
+
+</body>
+</html>

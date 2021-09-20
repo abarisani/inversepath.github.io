@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Inverse Path - Research</title>
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="stylesheet" href="styles/inversepath.css?113022017" type="text/css" />
+</head>
+
+<body>
+  <div id="page">
+    <div id="header">
+      <a id="inversepath_logo" href="index.html">Inverse Path</a>
+
+      <br/>
+
+      <ul id="top_menu">
+        <li><a href="industries.html">INDUSTRIES</a></li>
+        <li><a href="services.html">SERVICES</a></li>
+        <li><a href="usbarmory.html">PRODUCTS</a></li>
+        <li><a href="research.html">RESEARCH</a></li>
+        <li><a href="news.html">NEWS</a></li>
+        <li><a href="company.html">COMPANY</a></li>
+      </ul>
+
+      <ul id="top_menu_second_level">
+        <li><a href="tenshi.html">TENSHI</a></li>
+        <li><a class="selected">DOCUMENTATION</a></li>
+        <li><a href="tenshi_faq.html">FAQ</a></li>
+        <li><a href="https://github.com/inversepath/tenshi">REPOSITORY</a></li>
+      </ul>
+    </div>
+
+    <div class="section_title">TENSHI - MAN PAGE</div>
+
+    <div class="section">
+<h2 id="NAME">NAME</h2>
+<p>
+tenshi - Log Monitoring and Reporting tool
+</p>
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+<pre class="code">
+tenshi [ -c &lt;conf file&gt; ] [ -C ] [ -d &lt;debug level&gt; ] [ -f ] [ -h ] [ -p ] [ -P &lt;pid file&gt; ]
+</pre>
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+<p>
+tenshi is a log monitoring program, designed to watch one or more log files for lines matching user defined regular expressions and report on the matches. The regular expressions are assigned to queues which have an alert interval and a list of mail recipients.
+</p>
+<p>
+Queues can be set to send a notification as soon as there is a log line assigned to it, or to send periodic reports.
+</p>
+<p>
+Additionally, uninteresting fields in the log lines (such as PID numbers) can be masked with the standard regular expression grouping operators ( ). This allows cleaner and more readable reports. All reports are separated by hostname and all messages are condensed when possible.
+</p>
+<p>
+The program reads a configuration file (tenshi.conf) and then forks a deamon for monitoring the specified log files.
+</p>
+<p>
+
+</p>
+<h2 id="OPTIONS">OPTIONS</h2>
+
+<pre class=code>
+-c &lt;conf file&gt;
+</pre>
+<p>
+Read configuration from file. The default file is /etc/tenshi/tenshi.conf .
+</p>
+<pre class=code>
+-C
+</pre>
+<p>
+Perform a syntax check of the configuration file. The program exits after parsing the configuration with either a return code of 0 or an error.
+</p>
+<pre class=code>
+-d &lt;debug level&gt;
+</pre>
+<p>
+Enable debug messages. Default level is 1 if none is specified, level 2 enables SMTP connection debug messages. In this mode the main process remains in the foreground.
+</p>
+<pre class=code>
+-f
+</pre>
+<p>
+Enable foreground mode. In this mode the main process operates normally but remains in the foreground, this is needed for some process supervisors.
+</p>
+<pre class=code>
+-p
+</pre>
+<p>
+Enable profiling mode. In this mode the main process remains in the foreground and expects log lines to be fed to standard in. When it receives an EOF it will stop processing. No alerts will be sent in this mode, it is used solely for measuring tenshi's line processing speed. For example: time $(cat /var/log/messages|tenshi -p)
+</p>
+<pre class=code>
+-P &lt;pid file&gt;
+</pre>
+<p>
+Define the file containing the PID of the process, this overrides any 'pidfile' option present in the configuration file.
+</p>
+<p>
+</p>
+<h2 id="CONFIGURATIONFILE">CONFIGURATION FILE</h2>
+<p>
+All directives are shown with the standard default value where applicable, if omitted the default value will be used.
+</p>
+<p>
+<strong>EXTERNAL CONFIGURATION FILES</strong>
+</p>
+<p>
+All configuration directives can be optionally split into different configuration files and then read with the two following statements.
+</p>
+<pre class=code>
+include &lt;configuration file&gt;
+</pre>
+<p>
+Parse the specified configuration file.
+</p>
+<pre class=code>
+includedir &lt;directory&gt;
+</pre>
+<p>
+Parse all files inside &lt;directory&gt;. The files will be parsed in alphabetical order, keep in mind that regexps order matters so includedir should be used carefully, see REGEXP DEFINITIONS for details.
+</p>
+<p>
+<strong>STATIC OPTIONS</strong>
+</p>
+<p>
+These options will be set the first time tenshi reads its config file. They cannot be changed by re-reading the config file. If you change one of these options and HUP tenshi it will die. You have been warned.
+</p>
+<pre class=code>
+set uid tenshi
+</pre>
+<p>
+Specify the effective user ID of the process when in daemon mode. The user must be able to read the selected log files, the configuration file and write the specified pid file. Using a privilege user is discouraged as it is not usually necessary (log files permissions can be set accordingly with most syslog implementations).
+</p>
+<pre class=code>
+set gid tenshi
+</pre>
+<p>
+Specify the effective group ID of the process when in daemon mode.
+</p>
+<pre class=code>
+set pidfile /var/run/tenshi.pid
+</pre>
+<p>
+The file containing the PID of the process, useful for start/stop scripts.
+</p>
+<pre class=code>
+set logfile &lt;log file path&gt;
+</pre>
+<p>
+A log file to monitor, this may be specified multiple times to watch more than one log file. Depending on your tail implementation you might need to use the tail_multiple setting for multiple files to work. This mode can be used along with fifo, listen and redisqueue settings.
+</p>
+<pre class=code>
+set tail /usr/bin/tail -q --follow=name --retry -n 0
+</pre>
+<p>
+Specify the location of the tail binary used for reading the log files. The invocation must be tuned against your current 'tail' implementation. Default values are configured for standard GNU coreutils tail. The --follow=name and --retry flags should deal properly with log rotation, if missing on your implementation we suggest that you use 'cp /dev/null logfile', or similar techniques, as a safe way to clear the log file upon rotation.
+</p>
+<pre class=code>
+set tail_multiple &lt;on|off&gt;
+</pre>
+<p>
+Some tail implementations do not handle more than one log file. When this option is enabled multiple tail commands will be forked, instead of a single command with multiple arguments. This option is disabled by default.
+</p>
+<pre class=code>
+set fifo &lt;fifo path&gt;
+</pre>
+<p>
+Use a FIFO instead of a file. This overrides set logfile and set tail since we are not using a standard file. This option allows you to use a syslog-ng pipe() destination (or any other syslog implementation that allows FIFO usage). Unlike set logfile this option can be specified only once. This option is meant to be used only when the installed 'tail' binary doesn't behave properly with FIFOs, please test your tail implementation before using this. This mode can be used along with logfile, fifo and redisqueue settings.
+</p>
+<pre class=code>
+set listen 0.0.0.0:514
+</pre>
+<p>
+Enables syslog server mode. With this option tenshi will bind to the specified address:port pair and read messages acting like a syslog server. We
+always recommend to filter the port accordingly and possibly use stunnel, or similar wrappers, to encrypt the traffic. This mode can be used along with
+logfile, fifo and redisqueue settings.
+</p>
+<pre class=code>
+set redisqueue &lt;queue name&gt;
+</pre>
+<p>Enables monitoring of logs consumed from a Redis queue of the given name,
+this may be specified multiple times. See redisserver setting for instance
+specification. This mode can be used along with logfile, fifo and listen
+settings.
+</p>
+<pre class=code>
+set redisserver 127.0.0.1:6379
+</pre>
+<p>
+Specify the server path for the Redis instance to be used by the redisqueue
+setting. The parameter is passed to the new() method of the perl Redis binding, please refer to
+its manual for accepted values. The setting typically accepts an address:port pair or socket path.
+</p>
+<p>
+<strong>DYNAMIC OPTIONS</strong>
+</p>
+<p>
+These options are set each time the config file is read. tenshi reads its config file once on start-up and whenever it receives a HUP.
+</p>
+<pre class=code>
+set sleep 5
+</pre>
+<p>
+The loop sleep time for the notification process. The value must be &lt;= 60 seconds.
+</p>
+<pre class=code>
+set limit &lt;number of lines&gt;
+</pre>
+<p>
+The maximum number of messages per hostname allowed in a report, any lines after the maximum will be omitted and a warning included. If this option is omitted then no limit is applied.
+</p>
+<pre class=code>
+set pager_limit &lt;number of lines&gt;
+</pre>
+<p>
+The maximum number of messages per hostname allowed in pager friendly reports, any lines after the maximum will be omitted. If this option is omitted then no limit is applied.
+</p>
+<pre class=code>
+set logprefix &lt;regexp&gt;
+</pre>
+<p>
+All valid syslog messages are parsed by default, while non-syslog ones are discarded unless the special noprefix queue is set. This option allows to define an additional valid prefix for watching other type of logs. If the regexp is matched then the prefix is removed from the log and the first grouped string is used for the hostname field. This may be specified multiple times to watch many different non-syslog logs.
+</p>
+<pre class=code>
+set mask ______
+</pre>
+<p>
+The mask for strings enclosed by the grouping operators ( ). See the REGEXP DEFINITIONS section. 'set mask' on its own will set the mask to an empty string.
+</p>
+<pre class=code>
+set mailserver localhost
+</pre>
+<p>
+The mail server to be contacted for sending out reports.
+</p>
+<pre class=code>
+set mailtimeout 10
+</pre>
+<p>
+The timeout in seconds for mail server reply.
+</p>
+<pre class=code>
+set mailhelo localhost.localdomain
+</pre>
+<p>
+The client identification sent to the mailserver with the SMTP HELO command.
+</p>
+<pre class=code>
+set subject tenshi report
+</pre>
+<p>
+The subject of report emails, the queue name is always automatically appended.
+</p>
+<pre class=code>
+set hidepid &lt;on|off&gt;
+</pre>
+<p>
+This option turns on automatic stripping of 'foo[1234]:' style PID strings from the start of log lines i.e. 'foo[1234]:' becomes 'foo:'. This allows you to write regexps without worrying about masking the PID. Bear in mind that any time you change this option you will need to re-write your regex rules or they will not work. This option is disabled by default.
+</p>
+<pre class=code>
+set filter &lt;queue&gt; &lt;filter path&gt; &lt;arguments&gt;
+</pre>
+<p>
+When this option is enabled all reports matching the specified queue will be passed as STDIN to the specified filter, the resulting output is sent via smtp instead of the original report. The full path of the filter application must be specified.
+</p>
+<pre class=code>
+set csv &lt;cron_spec&gt; &lt;filter path&gt; &lt;arguments&gt;
+</pre>
+<p>
+This feature allows periodic reporting, using a five-field cron-style specification like the set queue option, to the specified filter. The output is pre-formatted as CSV (Comma Separated Values) with  hostname,log,hits format. This feature was coded for using <a href="http://afterglow.sf.net">AfterGlow</a> as a filter and graphing tenshi output. Check the FAQ for sample usage.
+</p>
+<pre class=code>
+set sort_order descending
+</pre>
+<p>
+The sorting order for reports, it can be either descending or ascending. The number of messages is used as a key for sorting the log messages. The default order is ascending.
+</p>
+<pre class=code>
+set resolve &lt;on|off&gt;
+</pre>
+<p>
+This option turns on resolution of the fully qualified domain name for the hostname passed along with log messages and, if found, reports it along with the original one. This only affects reports and not pager messages. The name resolution is cached in order to avoid re-resolving addresses that have been seen already, you have to restart or HUP tenshi in order to flush the cache. This option is disabled by default.
+</p>
+
+<pre class=code>
+set threshold &lt;queue&gt; &lt;count&gt; &lt;regex&gt; 
+</pre>
+<p>
+This option can be used to discard lines from a report that have a count below the given threshold. If a line matches the regex in the given queue but has fewer hits than count, it is discarded and omitted from the report. Note that this matches on the content of the lines that will actually appear in the report, in contrast to queue escalation which uses a count based on the regex that is matched.
+</p>
+<p>
+<strong>QUEUES OPTIONS</strong>
+</p>
+<p>
+All messages are assigned to queues. Every queue is processed periodically according to its notification interval. There are four default builtin queues, trash to which unwanted messages can be assigned (think /dev/null), repeat which is used for smart repeat messages handling, group and group_host, see REGEXP DEFINITIONS for details. There's also a special noprefix queue, read further for details about it.
+</p>
+<p>
+All queues are automatically flushed before shutdown when a SIGTERM is received. Please see section SIGNALS for additional information.
+</p>
+<p>
+The syntax is the following:
+</p>
+<pre class=code>
+set queue &lt;queue_name&gt; &lt;mail_from&gt; [pager:]&lt;mail_to&gt; &lt;cron_spec&gt; [&lt;subject&gt;] &lt;queue_name&gt;
+</pre>
+<p>
+The queue name. Can be any alphanumeric character string except for the builtin queues name.
+</p>
+<pre class=code>
+&lt;mail_from&gt;
+</pre>
+<p>
+The mail sender for reports related to the queue.
+</p>
+<pre class=code>
+&lt;mail_to&gt;
+</pre>
+<p>
+The mail recipient(s) for reports related to the queue. Multiple address can be specified, separated by commas. Using the pager: prefix enables a pager friendly report.
+</p>
+<pre class=code>
+[&lt;cron_spec&gt;]
+</pre>
+<p>
+This is a five-field cron-style specification for when the reports should be emailed. Ranges and skip values are supported as per the de facto crontab syntax with a few exceptions. Please see crontab man page for crontab syntax explanation. The supported day names are: Mon, Tue, Wed, Thu, Fri, Sat, Sun. Monday is 1, Sunday 0 or 7. Supported month names are: Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec. Day and Month names are not case sensitive. Additionally, 'now' can be specified for immediate notifications.
+</p>
+<pre class=code>
+&lt;subject&gt;
+</pre>
+<p>
+This is the subject for to use for email reports regarding this queue. If this isn't specified then the default subject will be used.
+</p>
+<p>
+The special noprefix queue can be used and defined like any other queue with the difference that it will get all messages that don't match any configured prefix.
+</p>
+<p>
+Examples:
+</p>
+<pre class="code">
+set queue report tenshi@localhost sysadmin@localhost [0 9-17 * * *]
+
+set queue report tenshi@localhost sysadmin@localhost [30 18 * * *]
+
+set queue report tenshi@localhost sysadmin@localhost [*/10 * * * *]
+
+set queue critical tenshi@localhost sysadmin@localhost,noc@localhost [now] CRITICAL WARNING -
+
+set queue pager tenshi@localhost pager:sysadmin_pager@localhost,pager:noc_pager@localhost [now] ALERT
+</pre>
+<p>
+<strong>REGEXP DEFINITIONS</strong>
+</p>
+<p>
+All valid syslog messages are matched against standard perl regexps, all regexps are defined with the following syntax:
+</p>
+<pre class="code">
+&lt;queue_name&gt;[,&lt;queue_name&gt;[:&lt;escalation_number&gt;]..] &lt;regexp&gt;
+</pre>
+<p>
+The regexps are evaluated in order so a matched message is not checked against the subsequent regexps. Keep this in mind when assembling the configuration file. It's advisable to catch all messages by placing an all matching regexp at the end of the configuration file. It's also good for performance having trash rules not logically connected with other matching rules at the beginning of the section. Multiple queues can be defined with a comma separated list, builtin queues cannot be used when using this syntax.
+</p>
+<p>
+If an escalation number is provided for a queue, the matched message will only be placed into the queue when &lt;escalation_number&gt; messages have matched the regexp. The queue will receive the message that matched the regexp at the time of escalation, with a count equal to the escalation number. The count of messages matching the regexp will be reset when the left most queue mentioned in the queue list is mailed. The left most queue cannot have an escalation number unless it is the only queue listed. When the number of messages that match the regexp reaches the greatest escalation number mentioned, escalation will begin again into the escalation queues, modulus the greatest escalation number. For example, using the queues `a,b:10,c:50', when 10 messages match the regexp, a message will go into b, when 50 match, one will go into c. At 60, another will go into b, and at 100, another into c, 110 to b, 150 to c, and so on. Escalation numbers must be positive integers greater than zero and must be listed in increasing order from left to right. All queues without escalation numbers must be listed more left than the queues with escalation numbers.
+</p>
+<p>
+The standard grouping operators ( ) can be used for string masking, literal "(" and ")" can be protected with the standard quotation operator "\". There's a lot of documentation about regular expressions, a good start could be perl perlre and perlretut manual pages.
+</p>
+<p>
+You can also use the (?: ) operators to use groups without masking. This allows you to match, for example, output from several programs in a similar format. There is an example of this below (the sudo/su line).
+</p>
+<p>
+The builtin queue repeat can be used for special handling of "last message repeated x times" style log lines. When the assigned regexps are matched the line count for the last line received from the same host is incremented by the first grouped string. Keep in mind that it is possible for syslog lines to be received from remote hosts out of order. If this happens you should not use this feature because tenshi will mis-report line counts.
+</p>
+<p>
+The builtin queue group can be used to group sets of regex together to speed up line matching. If a line fails to match a regex assigned to the group queue then tenshi will skip all the regex up until the next group_end statement. Nested groups are allowed. An example of this is included below.
+</p>
+<p>
+The builtin group_host queue can be used for selective hostname  matching. Like the group queue it is also terminated with the group_end statement. All regex definitions within that group will only apply if the hostname associated to the log entries matches the regex passed to the group_host definition.
+</p>
+<p>
+The regexps below assume hidepid is turned on. If you have it turned off then you will need to add in \[(.+)\] to the regex following the progam name to get them to work.
+</p>
+<p>
+For example:
+</p>
+<pre class="code">
+mail !^sendmail: (.+): to=(.+),(.+)delay=(.+) becomes: mail !^sendmail\[(.+)\]: (.+): to=(.+),(.+)delay=(.+)
+</pre>
+
+<p>
+Examples:
+</p>
+<pre class=code>
+trash ^xinetd
+
+repeat ^(?:last message repeated|above message repeats) (\d+) time
+
+group ^sendmail:
+mail ^sendmail: (.+): to=(.+),(.+)delay=(.+)
+mail ^sendmail: (.+): to=(.+),(.+)relay=(.+),(.+)stat=Sent
+group_end
+
+group_host mailserver1
+mail1 ^sendmail
+mail1 ^sendmail:.+
+critical,mail1 ^sendmail:.+SYSERR.+
+group_end
+
+mail ^ipop3d: Login user=(.+)
+
+general,urgent:200,critical:1000 ^sshd: Illegal user
+
+root ^sshd\(pam_unix\): session opened for user root by root\(uid=0\)
+
+report ^sshd: Accepted rsa for (.+) from (.+) port (.+)
+
+trash ^sshd
+
+critical ^(?:sudo|su):
+
+critical,pager ^Oops
+
+misc .*
+</pre>
+<p>
+
+</p>
+<h2 id="SIGNALS">SIGNALS</h2>
+<p>
+tenshi can handle different signals sent to the process, here's the list of supported ones:
+</p>
+<pre class="code">
+TERM
+</pre>
+<p>
+flush all queues and then exit
+</p>
+<pre class="code">
+INT
+</pre>
+<p>
+flush all queues and then exit
+</p>
+<pre class="code">
+USR1
+</pre>
+<p>
+flush any queues which have reached their notification interval
+</p>
+<pre class="code">
+USR2
+</pre>
+<p>
+force all queues to be flushed, even if they have not reached their notification interval
+</p>
+<pre class="code">
+HUP
+</pre>
+<p>
+force all queues to be flushed, even if they have not reached their notification interval, re-read the config file and continue as normal.
+</p>
+<p>
+WARNING: If you change a STATIC OPTION in the config file and send tenshi a HUP it will die. You will need to restart tenshi for changes to STATIC OPTIONs to take effect.
+
+</p>
+<h2 id="EXAMPLES">EXAMPLES</h2>
+
+<p>See the included <a href="https://github.com/inversepath/tenshi/blob/master/tenshi.conf">tenshi.conf</a>.</p>
+
+<h2 id="REQUIREMENTS">REQUIREMENTS</h2>
+<p>
+- Perl.<br/>
+- A working 'tail' implementation, when using the logfile option.<br/>
+- The Net::SMTP perl module to mail reports, typically included in perl installations.<br/>
+- The IO::BufferedSelect perl module.<br/>
+- The Redis perl module, when using the redisqueue option.<br/>
+</p>
+<p>
+Any missing module can be downloaded from CPAN (<a href="http://www.cpan.org">http://www.cpan.org</a>) or installed
+using the CPAN shell (perl -e shell -MCPAN).
+</p>
+<h2 id="BUGS">BUGS</h2>
+<p>
+Double quote characters present in your logs might break csv output (depending on how you pipe/process it in the filter) since there's no escape code (yet).
+</p>
+
+<p>Please report any bugs you find at &lt;<a href="mailto:tenshi@inversepath.com">tenshi@inversepath.com</a>&gt;</p>
+
+<h2 id="LICENSE">LICENSE</h2>
+<p>
+tenshi is distributed under the terms of the following ISC-style license:
+</p>
+<p>
+Permission to use, copy, modify, and distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+</p>
+<p>
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+</p>
+<h2 id="DISTRIBUTION">DISTRIBUTION</h2>
+<p>
+The tenshi project page is <a href="https://www.inversepath.com/tenshi.html">https://www.inversepath.com/tenshi.html</a>
+</p>
+
+<h2 id="NOTES">NOTES</h2>
+<p>
+tenshi was once known as wasabi. The name was changed due to a trademark claim relating to another piece of software.
+</p>
+
+</p>
+<h2 id="SEEALSO">SEE ALSO</h2>
+<p>
+It should be noted that tenshi was initially a perl rewrite of oak (<a href="http://www.ktools.org">http://www.ktools.org</a>).
+</p>
+<p>
+<i>Friedl, Jeffrey E. F. Mastering Regular Expressions, 2nd Edition. O'Reilly</i>
+</p>
+<h2 id="AUTHORS">AUTHORS</h2>
+<p>Copyright 2004-2014 Andrea Barisani &lt;<a href="mailto:andrea@inversepath.com">andrea@inversepath.com</a>&gt;</p>
+
+    </div>
+
+    <div id="footer">
+      <div class="float_left">
+        &copy; F-Secure Corporation - All rights reserved. | <a href="company.html" title="Contact Us">Contact Us</a> | <a href="javascript:showLegal()">Legal</a>
+      </div>
+
+      <ul id="logos_menu">
+        <li><a class="infrastructure" href="services.html#infrastructure">INFRASTRUCTURE</a></li>
+        <li><a class="hardware" href="services.html#hardware">HARDWARE</a></li>
+        <li><a class="security" href="services.html#security">SECURITY</a></li>
+        <li><a class="software" href="services.html#software">SOFTWARE</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="legal_popup" style="visibility:hidden;">
+    <div id="fade"></div>
+    <div class="popup_block">
+      <div class="popup">
+        <a href="javascript:hideLegal()"><img src="images/popup_close.png" class="close_button" title="Close" alt="Close" /></a>
+        <b>Inverse Path is a registered trademark of F-Secure Corporation</b>
+        <br/><br/>
+        <b>Trieste office</b><br/>Via Mazzini 33, I-34121, Trieste - Italy
+        <br/><br/>
+        <b>F-Secure Corporation</b><br/>Tammasaarenkatu 7, FI-00181 Helsinki, Finland<br/>
+        <b>Business ID</b><br/>Registered office Helsinki - 0705579-2<br/>
+        <b>VAT Reg.</b><br/>FI07055792
+        <br/><br/>
+      </div>
+    </div>
+  </div>
+
+<script type="text/javascript">
+  function hideLegal() { document.getElementById('legal_popup').style.visibility = 'hidden'; }
+  function showLegal() { document.getElementById('legal_popup').style.visibility = 'visible'; }
+</script>
+
+</body>
+</html>

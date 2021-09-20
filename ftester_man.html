@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Inverse Path - Research</title>
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="stylesheet" href="styles/inversepath.css?113022017" type="text/css" />
+</head>
+
+<body>
+  <div id="page">
+    <div id="header">
+      <a id="inversepath_logo" href="index.html">Inverse Path</a>
+
+      <br/>
+
+      <ul id="top_menu">
+        <li><a href="industries.html">INDUSTRIES</a></li>
+        <li><a href="services.html">SERVICES</a></li>
+        <li><a href="usbarmory.html">PRODUCTS</a></li>
+        <li><a href="research.html">RESEARCH</a></li>
+        <li><a href="news.html">NEWS</a></li>
+        <li><a href="company.html">COMPANY</a></li>
+      </ul>
+
+      <ul id="top_menu_second_level">
+        <li><a href="ftester.html">FTESTER</a></li>
+        <li><a class="selected">DOCUMENTATION</a></li>
+        <li><a href="https://github.com/inversepath/ftester">REPOSITORY</a></li>
+      </ul>
+
+    </div>
+
+    <div class="section_title">FTESTER - MAN PAGE</div>
+
+    <div class="section">
+<h2>NAME</h2>
+<p>
+FTester - Firewall and IDS testing tool
+</p>
+<h2>SYNOPSIS</h2>
+<pre class="code">
+ftest [ -c &lt;sourceip:sourceport:destip:destport:flags:protocol:tos&gt; ] [ -e &lt;evasion_method&gt; ] [ -d &lt;delay&gt; ]
+      [ -f &lt;file&gt; ] [ -F ] [ -g &lt;fragments_number|fragments_size&gt; ] [ -k &lt;cksum&gt; ]
+      [ -p &lt;segments_number|segments_size&gt; ] [ -r ] [ -s &lt;time&gt; ] [ -t &lt;ttl&gt; ] [ -m &lt;marker&gt; ] [ -v ]
+</pre>
+<pre class="code">
+ftestd [ -c ttl1:ttl2 ] [ -g ] [ -i interface ] [ -m marker ] [ -v ]
+</pre>
+<pre class="code">
+freport ftest.log ftestd.log
+</pre>
+
+<h2>DESCRIPTION</h2>
+
+<p>FTester is a tool designed for testing firewalls filtering policies and Intrusion
+Detection System (IDS) capabilities.</p>
+The tool consists of two perl scripts, a packet injector (ftest) and the
+listening sniffer (ftestd). The first script injects custom packets, defined
+in ftest.conf, with a signature in the data part while the sniffer listens
+for such marked packets. The scripts both write a log file which is in the same form
+for both scripts. A 'diff -b' of the two produced files (ftest.log and
+ftestd.log) shows the packets that were unable to reach the sniffer due to
+filtering rules if these two scripts are ran on hosts placed on two different sides
+of a firewall. Stateful inspection firewalls are handled with the 'connection spoofing'
+option. A script called freport is also available for automatically parse the
+log files.</p>
+
+<p>Of course this is not an automated process, ftest.conf must be crafted for
+every different situation. Examples and rules are included in the sample configuration
+file.</p>
+<p>The IDS (Intrusion Detection System) testing feature can be used either with ftest
+only or with the additional support of ftestd for handling stateful inspection IDS,
+ftest can also use common IDS evasion techniques. Instead of using the configuration
+syntax the script can also process snort rule definition file.</p>
+
+<h2>OPTIONS</h2>
+
+<h3>ftest:</h3>
+
+<pre class="code">-c sourceip:sourceport:destip:destport:flags:protocol:tos</pre>
+
+<p>Injects a single packet (override -f option).</p>
+
+<pre class="code">-d delay (es. 0.25 = 250 ms)</pre>
+
+<p>Delay in milliseconds between each packet injection.</p>
+
+<pre class="code">-e evasion_method</pre>
+
+<p>See the <b>IDS EVASION</b> section.</p>
+
+<pre class="code">-f file</pre>
+
+<p>Read configuration from file.</p>
+
+<pre class="code">-F</pre>
+
+<p>When in connection spoofing mode terminate (FIN handshake) the created connection,
+useful if you don't want to flood firewall's connection tracking table with established
+entries, requires ftestd reply (see -s flag).</p>
+
+<pre class="code">-g fragments_number|fragments_size</pre>
+
+<p>Split TCP and UDP marked packets in the specified number of IP fragments, useful for
+checking firewall's fragmentation handling and IDS's fragmentation reassembly. In
+'connection spoofing' or 'evasion' mode only packets specified in configuration are
+fragmented and not connection control ones. Obviously 'fragments_number' must be &gt;= 2.
+If the specified number of fragments is incompatible with payload length ftest will
+automatically set the nearest right value.</p>
+
+<p>Additionally you can specify the fragments size in bytes if you append the suffix 'b'
+to the value (es. -g 16b), fragments size must be a multiple of 8. If the specified
+fragment's size is incompatible with payload length ftest will automatically set the
+nearest right value.</p>
+
+<pre class="code">-k checksum</pre>
+
+<p>Set a custom checksum instead of the right one when sending packets, useful to
+detect if the firewall is blocking invalid packets.</p>
+
+<pre class="code">-p segments_number|segments_size</pre>
+
+<p>Specify the number of TCP segments when splitting the tcp stream in evasion mode,
+see <b>IDS EVASION</b> for details. If the specified number of segments is
+incompatible with payload length ftest will automatically set the nearest right value.</p>
+
+<p>Additionally you can specify the segments size in bytes if you append the suffix
+'b' to the value (es. -p 16b). If the specified segments's size is incompatible with
+payload length ftest will automatically set the nearest right value.</p>
+
+<p>If not specified ftest will use the default value of 2 segments.</p>
+
+<pre class="code">-r</pre>
+
+<p>When in connection spoofing mode reset (RST packet) the created connection, useful
+if you don't want to flood firewall's connection tracking table with established entries,
+requires ftestd reply (see -s flag).</p>
+
+<pre class="code">-s time</pre>
+
+<p>Sleep time in seconds for waiting connection spoofing replies, see 'connection
+spoofing' option.</p>
+
+<pre class="code">-t ttl</pre>
+
+<p>Time to live that makes the ttl1/ttl2 evasion option packets visible to the IDS
+but not to the target host.</p>
+
+<pre class="code">-m marker</pre>
+
+<p>Custom marker string that is appended to the standard signature in generated
+packets and logs' filenames. Using this option permits multiple instances of
+ftest/ftestd to run simultaneously without interfering with each other.</p>
+
+<pre class="code">-v</pre>
+
+<p>Prints to stdout injected packets and be verbose.</p>
+
+<h3>ftestd:</h3>
+
+<pre class="code">-c ttl1:ttl2</pre>
+
+<p>Define TTL settings for the 'connection spoofing' option: set default stack TTL
+executing `echo &quot;ttl1&quot; &gt; /proc/sys/net/ipv4/ip_default_ttl` (Linux only)
+and set ftestd reply TTL to ttl2.</p>
+
+<pre class="code">-g</pre>
+
+<p>Enable fragments reassembly when sniffing packets, useful if you are using ftest
+fragmentation option and your firewall is not performing fragments reassembly.</p>
+
+<pre class="code">-i interface</pre>
+
+<p>Listen on interface, if not specified will default to the first configured one
+(excluding loopback).</p>
+
+<pre class="code">-m marker</pre>
+
+<p>Custom marker string that is tested for in received packets. Using this option
+permits multiple instances of ftest/ftestd to run simultaneously without interfering
+with each other.</p>
+
+<pre class="code">-v</pre>
+
+<p>Prints to stdout sniffed packets and be verbose.</p>
+
+<h2>CONFIGURATION FILE</h2>
+
+<b>A - flags</b>
+
+<p>Command line flags can be overridden with the 'flags:' directive at any point and
+any time, original flags can be restored with 'flags: restore'. See the man page or
+`ftest -h` for available flags.</p>
+
+<p>
+Examples:
+<pre class="code">
+flags: -d 0.01 -s 1
+
+flags: -e ttl1 -p 4
+
+flags: restore
+</pre>
+</p>
+
+<b>1 - basic form </b>
+
+<p>The main configuration file defines which packets ftest will send to ftestd, the
+basic syntax is the following:
+
+<pre class="code">
+Source Address:Source Port:Destination Address:Destination Port:Flags:Protocol:Type of Service
+</pre>
+
+for TCP and UDP packets
+
+<pre class="code">
+Source Address:Source Port:Destination Address:Destination Port:Flags:ICMP:icmp_type:icmp_code
+</pre>
+
+for ICMP packets
+
+<P>The <b>Source Address</b> can be specified as a single IP address, a range of
+addresses, or a CIDR block.</p>
+
+<p><b>Source Port</b> and <b>Destination Port</b> can also be specified in ranges.</p>
+
+<p>Valid <b>Flags</b> are  <b>A</b> (ACK), <b>F</b> (FIN), <b>P</b> (PUSH), <b>R</b>
+ (RST), <b>S</b> (SYN), <b>U</b> (URG).</p>
+
+<p><b>Destination Address</b> must be the host where ftestd is sniffing or one which
+ traffic can be sniffed.</p>
+
+<p>Line beginning with a # are comments and ignored by ftest.</p>
+
+Examples:
+
+<pre class="code">
+192.168.22.3:1025:10.7.0.1:80:AP:TCP:0
+192.168.22.3:1025:10.7.0.1:21:A:TCP:0
+192.168.22.3:20:10.7.0.1:1025:AP:TCP:10
+192.168.22.3:53:10.7.0.1:53::UDP:0
+192.168.22.3:1025:10.7.0.1:80::ICMP:3:5
+192.168.0.1-255:1024:10.7.0.1:22:S:TCP:0
+192.168.0.1:1-1024:10.7.0.1:20-25:S:TCP:22
+192.168.0.23:666:10.7.0.1:1-65535:A:TCP:0
+192.168.3.0/24:1024:10.7.0.1:22:S:TCP:0
+192.168.3.128/25:1-1024:10.7.0.1:20-25:S:TCP:22
+192.168.0.0/22:666:10.7.0.1:1-65535:A:TCP:0
+</pre>
+
+<b>2 - connection spoofing</b>
+
+<p>ftest and ftestd are capable of simulating a real connection, this is extremely
+useful when you are dealing with a stateful detection firewall (like netfilter)
+that blocks packets unrelated to an ongoing connection. In such cases packets like
+192.168.22.3:1025:10.7.0.1:80:AP:TCP:0 are likely to be blocked by the firewall if
+their sequence numbers and flags aren't synchronised with a previously started
+connection. In order to circumvent this problem if the packets are specified with
+the 'connect=' prefix ftest and ftestd will act in this way:</p>
+<ol type="a">
+<li>ftest will send 192.168.22.3:1025:10.7.0.1:80:S:TCP:0 with a custom payload and
+ sequence number set to $random_1, the payload size is 8 byte. Then it sleeps for a
+ custom time waiting for the firewall to see the packet specified in b).</li>
+<li>ftestd will recognize this packet and will send 10.7.0.1:80:192.168.22.3:1025 with
+ sequence number $random_2+1024 and acknowledge number ($random_1+payload_size+1).</li>
+<li>ftest, after the sleep period, will complete the connection handshake sending
+ 192.168.22.3:1025:10.7.0.1:80:A:TCP:0 with sequence number $random_1+payload_size+1 and
+ acknowledge number $random_2+1024+1</li>
+<li>ftest will finally send the specified packet with sequence number
+ $random_1+payload+size+1 and acknowledge number $random_2+1024+1</li>
+<li>ftestd acknowledge packet d)</li>
+</ol>
+
+<p>now there is one great problem with this approach, the stack of the destination
+host will reply to the packet sent in a) and the real host we've spoofed will reply
+to it resetting the connection. So we have to do two things, hiding the stack response
+to the spoofed host and to the firewall and make sure that ftestd reply will traverse
+the firewall by not reaching the spoofed host. Hiding the stack response could be done
+by setting a very low default TTL in /proc/sys/net/ipv4/ip_default_ttl (Linux only).
+Hiding to the spoofed host our reply ( b) ) is done by setting its TTL to a low value
+equal to the hop delay between ftestd and the firewall. For example use ./ftestd -c 0:3
+for temporarily setting default stack ttl to 0 and ftestd reply ttl to 3, the ip_default_ttl
+will be restored when a stop_signal is received.</p>
+
+<p><b>WARNING: if you interrupt ftestd execution and a stop_signal is not sniffed
+your default ttl will remain low! Manually restore the default value with
+'echo 64 &gt; /proc/sys/net/ipv4/ip_default_ttl'.</b></p>
+
+<p>NOTE: you can avoid this ttl mess by firewalling the input chain of the host or using
+a unallocated IP address published with a spoofed arp response.</p>
+
+<p>Remember to specify different sport-dport pairs if you use this mode again with the
+same saddr-daddr and you're not using the -r/-F flag. Use the -s flag for setting the
+sleep time duration.</p>
+
+<p>Packets a),b),c),e) are NOT logged.</p>
+
+Examples:
+
+<pre class="code">
+connect=192.168.0.1:1025:10.7.0.1:22:AP:TCP:0
+connect=192.168.0.1-255:1025-2000:10.7.0.1:53:AP:TCP:0
+connect=192.168.0.0/24:1025:10.7.0.1:1-1024:AP:TCP:0
+</pre>
+
+<b>3 - stop signal</b>
+
+<p>The stop signal tells ftestd to close the log file and die, obviously
+you must ensure that this packet will reach the sniffer.</p>
+
+Examples:
+
+<pre class="code">
+stop_signal=192.168.0.1:666:10.7.0.1:666:S:TCP:0
+</pre>
+
+<b>4 - IDS testing</b>
+
+<p>ftest has an additional syntax, useful for test Intrusion Detection System, that
+permits the definition of the payload. The support of ftestd is not necessary in this
+mode since mainly you have to check your IDS logs, however there is an
+&quot;ids-conn&quot; option that works just like the &quot;connect&quot; option,
+useful if your IDS is performing stateful inspection.</p>
+
+<p>See also the <b>IDS EVASION</b> section.</p>
+
+Examples:
+
+<pre class="code">
+ids=192.168.0.1:1025:10.7.0.1:25:S:TCP:0:VRFY
+ids=192.168.0.1::10.7.0.1:::ICMP:8:0:+++ath
+ids-conn=192.168.0.1:23:10.7.0.1:1025:PA:TCP:0:to su root
+ids-conn=192.168.0.1:1025:10.7.0.1:80:PA:TCP:0:cmd.exe
+ids-conn=192.168.0.1:1026:10.7.0.1:80:PA:TCP:0:ftp.exe
+</pre>
+
+<p>In addition you can use the following syntax to directly use a <b>snort</b>
+(<a href="http://www.snort.org" target="_new">http://www.snort.org</a>) rule definition file.
+The &quot;insert-conn&quot; option make ftest work as in the &quot;connection
+spoofing&quot; mode for packets with flags different than SYN. Source, destination
+IP and ToS must be specified.</p>
+
+<p>The following keywords are currently supported: content - flags - offset - dsize</p>
+
+<p>source and destination port are randomly selected if specified as 'any', in the
+case that a sport-dport pair is incidentally repeated connection spoofing mode won't
+work unless you're using the -r/-F flag.</p>
+
+Examples:
+
+<pre class="code">
+insert /etc/snort/exploit.rules 192.168.0.1 10.7.0.1 0
+insert-conn /etc/snort/exploit.rules 192.168.0.1 10.7.0.1 0
+</pre>
+
+<h2>IDS EVASION</h2>
+
+<p>A number of IDS evasion techniques are implemented, you can activate them with the
+-e flag when using 'ids-conn' and 'insert-conn' modes. TCP splitting can be controlled
+with the -p flag (see <b>OPTIONS</b>).</p>
+
+<pre class="code">-e stream</pre>
+
+<p>packet =&gt; [packet1(ATT) + packet2(ACK)]</p>
+
+<P>Simple splitting of the tcp stream
+
+<pre class="code">-e stream1</pre>
+
+<p>packet =&gt; [packet1(ATT) + packet(GARBAGE) [invalid checksum] + packet2(ACK)]</p>
+
+<p>The IDS will see 'ATTGARBAGEACK' instead of 'ATTACK' if it's not performing checksum analysis</p>
+
+<pre class="code">-e ttl1</pre>
+
+<p>packet =&gt; [packet1(ATT) [ttl n] + packet(GARBAGE) [ttl p] + packet2(ATT) [ttl n]]</p>
+<p>The IDS will see 'ATTGARBAGEACK' if p is a TTL sufficient to reach the IDS but not
+the target host. The ttl can be specified with the -t flag (see OPTIONS)</p>
+
+<pre class="code">-e rst1</pre>
+<p>packet =&gt; [packet1(ATT) + rst [invalid checksum] + packet2(ACK)]</p>
+
+<P>If the IDS is performing a poor connection tracking and it's not performing checksum
+analysis it will close the connection ignoring subsequent packets</p>
+
+<pre class="code">-e rst2</pre>
+<p>packet =&gt; [packet1(ATT) [ttl n] + rst [ttl p] + packet2(ACK) [ttl n]]</p>
+
+<p>The IDS will close the connection if p is a TTL sufficient to reach the IDS but
+not the target host. The ttl can be specified with the -t flag (see OPTIONS)</p>
+
+<pre class="code">-e desync1</pre>
+
+<p>packet =&gt; [packet1(ATT) + syn [wrong ack] + packet2(ACK)]</p>
+
+<p>If the IDS is performing a poor connection tracking it will resynchronize the
+connection against the wrong sequence numbers of the post-connection SYN</p>
+
+<pre class="code">-e desync2</pre>
+
+<p>packet =&gt; [syn [wrong ack+invalid checksum] + syn + packet1(ATT) + packet2(ACK)]</p>
+
+<p>If the IDS is performing connection tracking with no checksum analysis it will
+synchronize the connection against the wrong sequence numbers of the pre-connection
+SYN</p>
+
+<pre class="code">-e frag1</pre>
+
+<p>packet =&gt; [fragment3(C) + fragment2(TA) + fragment1(AT) + fragment4(K)]</p>
+
+<p>If the IDS can't correctly handle out of order IP fragments it won't reassemble the packet</p>
+
+<pre class="code">-e frag2</pre>
+
+<p>packet =&gt; [fragment4(K) + fragment3(C) + fragment2(TA) + fragment1(AT)]</p>
+
+<p>Like frag1 but send the last fragment first</p>
+
+<pre class="code">-e frag3</pre>
+<p>packet =&gt; [fragment1(AT) + fragment2(TA) + fragment3(C) + fragment3(C) + fragment4(K)]</p>
+
+<p>Duplicate the penultimate fragment</p>
+
+<pre class="code">-e frag4</pre>
+<p>packet =&gt; [fragment1(AT) + fragment1(OO) + fragment3(TACK)]</p>
+
+<p>Duplicate the first fragment with garbage data. Overlap attack effective if the
+IDS favors new data and the host favors old data.</p>
+
+<pre class="code">-e frag5</pre>
+
+<p>packet =&gt; [fragment1(OO) + fragment1(AT) + fragment3(TACK)]</p>
+
+<p>Send the first fragment with garbage data then duplicate it with correct payload.
+Overlap attack effective if the IDS favors old data and the host favors new data.</p>
+
+<p>A detailed explanation can be find in the following documents:</p>
+
+<p>Phrack Magazine, Volume 8, Issue 54 Dec 25th, 1998, article 10 (P54-10)</p>
+
+<p>Insertion, Evasion, and Denial of Service: Eluding Network Intrusion Detection - Thomas H. Ptacek, Timothy N.Newsham.</p>
+
+(<a href="http://www.nai.com/media/ps/nai_labs/ids.ps" target="_new">http://www.nai.com/media/ps/nai_labs/ids.ps</a>)
+
+<h2>FILES</h2>
+
+<ul>
+<li>ftest.conf: main configuration file.</li>
+<li>ftest.log: log file generated by ftest.</li>
+<li>ftestd.log: log file generated by ftestd.</li>
+</ul>
+
+<h2>EXAMPLES</h2>
+
+<p>See the included ftest.conf.</p>
+
+<h2>REQUIREMENTS</h2>
+
+Net::RawIP, Net::PcapUtils, NetPacket are required, you can grab them at <A HREF="http://www.cpan.org">www.cpan.org</A> or using
+your CPAN shell (`perl -e shell -MCPAN`). 
+<P>
+
+<h2>TODO</h2>
+<p>
+<ul>
+<li>add an option for sending fragments with split TCP/UDP header</li>
+<li>implement other evasion techniques</li>
+<li>throughput test and report</li>
+<li>improve snort conf parsing</li>
+<li>make ftestd -c flag compatible with other platforms</li>
+<li>graphic frontend</li>
+</ul>
+
+Any volounteers ? ;)
+</p>
+
+<h2>BUGS</h2>
+
+<p>Snort rules parsing is far from perfect and outdated, multiple content rules won't work and non-content rules are skipped
+as well as ip only ones. Additionally variables such as $HTTP_PORTS are currently not recognized and will create
+problems.</p>
+
+<p>ftestd -c flag works only on Linux.</p>
+
+<p>Please report any bugs you find at &lt;<a href="mailto:andrea@inversepath.com">andrea@inversepath.com</a>&gt;</p>
+
+<h2>LICENSE</h2>
+
+<p>The <b>FTester</b> is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License version 2 as published
+by the Free Software Foundation.</p>
+
+<h2 id="DISTRIBUTION">DISTRIBUTION</h2>
+<p>
+The ftester project page is <a href="https://www.inversepath.com/ftester.html">https://www.inversepath.com/ftester.html</a>
+</p>
+
+<h2>NOTES</h2>
+<p>The IDS testing option that injects packets reading snort configuration files
+is designed to test the IDS engine and NOT it's efficiency in detecting real world
+attacks, the detection of an attack involve multiple events and often human intervention
+to do proper correlation. The ftester can only be useful to verify things like the
+IDS placement, stateful inspection, fragmentation handling, overall speed and so on. Keep
+this in mind when using this tool.</p>
+
+<h2>SEE ALSO</h2>
+
+<p>A very similiar tool is the filterrules package, you can find it at
+<a href="http://www.hsc.fr/ressources/outils/filterrules/index.html.en" target="_new">http://www.hsc.fr/ressources/outils/filterrules/index.html.en</a></p>
+
+<p>Another snort false positive generator is sneeze, you can find it at
+<a href="http://snort.sourceforge.net/sneeze-1.0.tar" target="_new">http://snort.sourceforge.net/sneeze-1.0.tar</a></p>
+
+<p>Fragrouter, <a href="http://www.anzen.com/research/nidsbench" target="_new">http://www.anzen.com/research/nidsbench</a></p>
+
+<p>Fragroute, <a href="http://www.monkey.org/~dugsong/fragroute" target="_new">http://www.monkey.org/~dugsong/fragroute</a></p>
+
+<p>Stevens, W.Richard. TCP/IP Illustrated, Volume One: The Protocols. Reading, MA: Addison-Wesley. 1994.</p>
+
+<h2>AUTHORS</h2>
+<p>Copyright 2001-2011 Andrea Barisani &lt;<a href="mailto:andrea@inversepath.com">andrea@inversepath.com</a>&gt;</p>
+
+    </div>
+
+    <div id="footer">
+      <div class="float_left">
+        &copy; F-Secure Corporation - All rights reserved. | <a href="company.html" title="Contact Us">Contact Us</a> | <a href="javascript:showLegal()">Legal</a>
+      </div>
+
+      <ul id="logos_menu">
+        <li><a class="infrastructure" href="services.html#infrastructure">INFRASTRUCTURE</a></li>
+        <li><a class="hardware" href="services.html#hardware">HARDWARE</a></li>
+        <li><a class="security" href="services.html#security">SECURITY</a></li>
+        <li><a class="software" href="services.html#software">SOFTWARE</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="legal_popup" style="visibility:hidden;">
+    <div id="fade"></div>
+    <div class="popup_block">
+      <div class="popup">
+        <a href="javascript:hideLegal()"><img src="images/popup_close.png" class="close_button" title="Close" alt="Close" /></a>
+        <b>Inverse Path is a registered trademark of F-Secure Corporation</b>
+        <br/><br/>
+        <b>Trieste office</b><br/>Via Mazzini 33, I-34121, Trieste - Italy
+        <br/><br/>
+        <b>F-Secure Corporation</b><br/>Tammasaarenkatu 7, FI-00181 Helsinki, Finland<br/>
+        <b>Business ID</b><br/>Registered office Helsinki - 0705579-2<br/>
+        <b>VAT Reg.</b><br/>FI07055792
+        <br/><br/>
+      </div>
+    </div>
+  </div>
+
+<script type="text/javascript">
+  function hideLegal() { document.getElementById('legal_popup').style.visibility = 'hidden'; }
+  function showLegal() { document.getElementById('legal_popup').style.visibility = 'visible'; }
+</script>
+
+</body>
+</html>

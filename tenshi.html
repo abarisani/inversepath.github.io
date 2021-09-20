@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Inverse Path - Research</title>
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="stylesheet" href="styles/inversepath.css?113022017" type="text/css" />
+</head>
+
+<body>
+  <div id="page">
+    <div id="header">
+      <a id="inversepath_logo" href="index.html">Inverse Path</a>
+
+      <br/>
+
+      <ul id="top_menu">
+        <li><a href="industries.html">INDUSTRIES</a></li>
+        <li><a href="services.html">SERVICES</a></li>
+        <li><a href="usbarmory.html">PRODUCTS</a></li>
+        <li><a href="research.html">RESEARCH</a></li>
+        <li><a href="news.html">NEWS</a></li>
+        <li><a href="company.html">COMPANY</a></li>
+      </ul>
+
+      <ul id="top_menu_second_level">
+        <li><a class="selected">TENSHI</a></li>
+        <li><a href="tenshi_man.html">DOCUMENTATION</a></li>
+        <li><a href="tenshi_faq.html">FAQ</a></li>
+        <li><a href="https://github.com/inversepath/tenshi">REPOSITORY</a></li>
+      </ul>
+
+    </div>
+
+    <div class="section_title">TENSHI - LOG MONITORING TOOL</div>
+
+    <div class="section">
+      <p><b>tenshi</b> is a log monitoring program, designed to watch one or more log
+      files for lines matching user defined regular expressions and report on the
+      matches. The regular expressions are assigned to queues which have an alert
+      interval and a list of mail recipients.</p>
+
+      <p>Queues can be set to send a notification as soon as there is a log line
+      assigned to it, or to send periodic reports.</p>
+
+      <p>Additionally, uninteresting fields in the log lines (such as PID numbers)
+      can be masked with the standard regular expression grouping operators ( ). This
+      allows cleaner and more readable reports. All reports are separated by hostname
+      and all messages are condensed when possible.</p>
+
+      <p>The program reads a configuration file and then forks a deamon for monitoring
+      the specified log files. It can also be used as a stand-alone syslog server.</p>
+
+      <p>Please read the example <a href="https://github.com/inversepath/tenshi/blob/master/tenshi.conf">tenshi.conf</a> and <a href="tenshi_man.html">tenshi.8</a> man page for usage
+      instructions.</p>
+
+      <p>tenshi was formerly known as wasabi. The name was changed to tenshi after we
+      were informed that wasabi is a registered trademark relating to another piece
+      of software.</p>
+    </div>
+
+    <div class="section_title">EXAMPLES</div>
+
+    <div class="section">
+      <p>Consider the following settings in tenshi.conf:</p>
+
+<pre class="code">
+set hidepid on
+
+set queue mail     tenshi@localhost sysadmin@localhost [0 */12 * * *]
+set queue misc     tenshi@localhost sysadmin@localhost [0 */24 * * *]
+set queue critical tenshi@localhost sysadmin@localhost [now]
+
+group ^ipop3d:
+
+mail ^ipop3d: Login user=(.+)
+mail ^ipop3d: Logout user=(.+)
+mail ^ipop3d: pop3s SSL service init from (.+)
+mail ^ipop3d: pop3 service init from (.+)
+mail ^ipop3d: Command stream end of file, while reading.+
+mail ^ipop3d: Command stream end of file while reading.+
+
+critical ^ipop3d: Login failed.+
+
+trash ^ipop3d:.+
+
+group_end
+
+critical ^sudo: (.+) : TTY=(.+) ; PWD=(.+) ; USER=root ; COMMAND=(.+)
+
+misc .*
+</pre>
+
+      <p>
+        Every ipop3d message not matched by the regexps assigned to the queue
+        <i>mail</i> or critical will be matched by the queue <i>trash</i> (a builtin
+        null queue), any other message will be matched by queue <i>misc</i>. Fields
+        enclosed in (.+) are masked.
+      </p>
+
+      <p>
+        This is a sample report for the mail <i>queue</i> (sent every 12 hours):
+      </p>
+
+<pre class="code">
+host1:
+    79: ipop3d: Login user=___
+    74: ipop3d: Logout user=___
+
+host2:
+    30: ipop3d: Login user=___
+    30: ipop3d: Logout user=___
+    19: ipop3d: pop3 service init from ___
+    12: ipop3d: pop3s SSL service init from ___
+    1: ipop3d: Command stream end of file while reading line user=??? host=bogus.domain.net [192.168.0.1]
+    1: ipop3d: Command stream end of file, while reading authentication host=bogus1.domain.net [10.1.7.1]
+</pre>
+
+      <p>
+        These are sample reports for the critical <i>queue</i> (sent every time a message matches the regexp):
+      </p>
+
+<pre class="code">
+host1:
+    1: /usr/bin/sudo: ___ : TTY=___ ; PWD=___ ; USER=root ; COMMAND=/bin/dmesg
+
+host1:
+    1: /usr/bin/sudo: ___ : TTY=___ ; PWD=___ ; USER=root ; COMMAND=/bin/bash
+
+host2:
+    1: ipop3d: Login failed user=admin auth=admin host=bogus1.domain.net [10.1.7.1]
+
+host2:
+    1: ipop3d: Autologout user=??? host=bogus.domain.net [192.168.0.1]
+</pre>
+    </div>
+
+    <div class="section_title">REQUIREMENTS</div>
+
+    <div class="section">
+      <p>This is a perl program that uses 'tail' (when not using a FIFO) which
+      should be included in your OS.</p>
+
+      <p>It also requires Net::SMTP module for mailing reports, which should be
+      included in your perl installation, and IO::BufferedSelect. If you miss any of
+      them you can grab them at <a href="http://www.cpan.org">CPAN</a> or using
+      the CPAN shell (perl -e shell -MCPAN).</p>
+    </div>
+
+    <div class="section_title">DOCUMENTATION</div>
+
+    <div class="section">
+      <p>The full <a href="tenshi_man.html">man page</a> and a <a href="tenshi_faq.html">FAQ</a> are available.</p>
+    </div>
+
+    <div class="section_title">RESOURCES</div>
+
+    <div class="section">
+      <p>The public repository is hosted on GitHub at <a href="https://github.com/inversepath/tenshi">https://github.com/inversepath/tenshi</a></p>
+
+      <p>Please send requests/suggestions/bug reports to <a href="mailto:tenshi@inversepath.com">tenshi@inversepath.com</a></p>
+    </div>
+
+    <div class="section_title">SPONSORSHIP</div>
+
+    <div class="section">
+      <p>Inverse Path is open to discuss sponsored development of new features
+      outside the normal development cycle. If you would like a new feature adding or
+      commercial quality support for an installation of tenshi, please email:
+      <a href="mailto:support@inversepath.com">support@inversepath.com</a>.</p>
+    </div>
+
+    <div id="footer">
+      <div class="float_left">
+        &copy; F-Secure Corporation - All rights reserved. | <a href="company.html" title="Contact Us">Contact Us</a> | <a href="javascript:showLegal()">Legal</a>
+      </div>
+
+      <ul id="logos_menu">
+        <li><a class="infrastructure" href="services.html#infrastructure">INFRASTRUCTURE</a></li>
+        <li><a class="hardware" href="services.html#hardware">HARDWARE</a></li>
+        <li><a class="security" href="services.html#security">SECURITY</a></li>
+        <li><a class="software" href="services.html#software">SOFTWARE</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="legal_popup" style="visibility:hidden;">
+    <div id="fade"></div>
+    <div class="popup_block">
+      <div class="popup">
+        <a href="javascript:hideLegal()"><img src="images/popup_close.png" class="close_button" title="Close" alt="Close" /></a>
+        <b>Inverse Path is a registered trademark of F-Secure Corporation</b>
+        <br/><br/>
+        <b>Trieste office</b><br/>Via Mazzini 33, I-34121, Trieste - Italy
+        <br/><br/>
+        <b>F-Secure Corporation</b><br/>Tammasaarenkatu 7, FI-00181 Helsinki, Finland<br/>
+        <b>Business ID</b><br/>Registered office Helsinki - 0705579-2<br/>
+        <b>VAT Reg.</b><br/>FI07055792
+        <br/><br/>
+      </div>
+    </div>
+  </div>
+
+<script type="text/javascript">
+  function hideLegal() { document.getElementById('legal_popup').style.visibility = 'hidden'; }
+  function showLegal() { document.getElementById('legal_popup').style.visibility = 'visible'; }
+</script>
+
+</body>
+</html>

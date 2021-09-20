@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /
+
+User-agent: googlebot
+Disallow: /_*
+
+User-agent: msnbot
+Disallow: /_*
+
+User-agent: slurp
+Disallow: /_*
