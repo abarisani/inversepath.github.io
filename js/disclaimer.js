@@ -14,13 +14,11 @@ showDisclaimer = function() {
   $('#disclaimer_popup').append(`<div class="popup_block">
     <div class="popup">
       <a href="javascript:hideDisclaimer()"><img src="images/popup_close.png" class="close_button" title="Close" alt="Close" /></a>
-      <b>Inverse Path is a registered trademark of F-Secure Corporation</b>
+      <b>Inverse Path has been acquired by WithSecure (formerly F-Secure) Corporation in 2017</b>
       <br/><br/>
-      <b>Trieste office</b><br/>Via Mazzini 33, I-34121, Trieste - Italy
+      <b>This site is an historical archive of Inverse Path former home.</b>
       <br/><br/>
-      <b>F-Secure Corporation</b><br/>Tammasaarenkatu 7, FI-00181 Helsinki, Finland<br/>
-      <b>Business ID</b><br/>Registered office Helsinki - 0705579-2<br/>
-      <b>VAT Reg.</b><br/>FI07055792
+      <b>The former Inverse Path team now works at <a href="http://foundry.withsecure.com">WithSecure Foundry</a>.</b>
       <br/><br/>
     </div>
   </div>`);
